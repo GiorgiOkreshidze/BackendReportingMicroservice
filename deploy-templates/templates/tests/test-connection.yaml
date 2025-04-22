@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include "backend-reporting.fullname" . }}-test-connection"
+  labels:
+    {{- include "backend-reporting.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test-success
+spec:
+  containers:
+    - name: wget
+      image: busybox
+      command: ['wget']
+      args: ['{{ include "backend-reporting.fullname" . }}:{{ .Values.service.port }}']
+  restartPolicy: Never
