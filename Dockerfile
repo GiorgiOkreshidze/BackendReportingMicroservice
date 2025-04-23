@@ -7,6 +7,9 @@ WORKDIR /app
 # Copy the published app from the build stage
 COPY /app ./
 
+# ENV VARIABLES
+ENV ASPNETCORE_ENVIRONMENT=Development
+
 # Expose port 80
 EXPOSE 80
 
