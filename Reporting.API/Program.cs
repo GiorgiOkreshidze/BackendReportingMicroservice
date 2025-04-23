@@ -16,13 +16,10 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.MapGet("/", () => "Hello World!");
 app.MapPost("/send-report", () =>
 {
     Console.WriteLine("Manual report triggered. Report is sent.");
     return Results.Ok("Report is sent");
-})
-.WithName("SendReport")
-.WithOpenApi();
-
-
+});
 app.Run();
