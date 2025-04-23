@@ -1,6 +1,0 @@
-@Reporting.API_HostAddress = http://localhost:5072
-
-POST {{Reporting.API_HostAddress}}/send-report/
-Accept: application/json
-
-###
