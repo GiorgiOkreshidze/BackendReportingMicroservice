@@ -11,4 +11,4 @@ COPY /app ./
 EXPOSE 80
 
 # Run the application
-ENTRYPOINT ["dotnet", "HelloWorld.dll"]
+ENTRYPOINT ["dotnet", "Reporting.API.dll"]
