@@ -128,3 +128,13 @@ env:
         secretKeyRef:
           name: run7team2-aws-secret
           key: aws-session-token
+    - name: FROM_EMAIL
+      valueFrom:
+        secretKeyRef:
+          name: run7team2-emails-secret
+          key: from-email
+    - name: TO_EMAIL
+      valueFrom:
+        secretKeyRef:
+          name: run7team2-emails-secret
+          key: to-email

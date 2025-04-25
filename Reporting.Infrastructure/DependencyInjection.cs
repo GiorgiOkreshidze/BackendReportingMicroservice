@@ -4,6 +4,8 @@ using Amazon.SQS;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Reporting.Infrastructure.AWS;
+using Reporting.Infrastructure.Repositories;
+using Reporting.Infrastructure.Repositories.Interfaces;
 
 namespace Reporting.Infrastructure;
 
@@ -25,6 +27,9 @@ public static class DependencyInjection
             DynamoDbFactory.CreateDynamoDbContext(sp.GetRequiredService<IAmazonDynamoDB>()));
 
         services.AddSingleton<IAmazonSQS>(_ => SqsFactory.CreateSqsClient(credentials));
+        
+        services.AddScoped<IReportRepository, ReportRepository>();
+
         return services;
     }
 }
