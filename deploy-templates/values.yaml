@@ -128,6 +128,11 @@ env:
         secretKeyRef:
           name: run7team2-aws-secret
           key: aws-session-token
+    - name: AWS_DEFAULT_REGION
+      valueFrom:
+        secretKeyRef:
+          name: run7team2-aws-secret
+          key: aws-default-region
     - name: FROM_EMAIL
       valueFrom:
         secretKeyRef:
