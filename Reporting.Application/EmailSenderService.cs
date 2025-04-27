@@ -8,7 +8,7 @@ using Reporting.Application.Interfaces;
 
 namespace Reporting.Application;
 
-public class EmailSenderService(AmazonSimpleEmailServiceClient sesClient, ILogger<ReportSenderService> logger, IOptions<EmailSettings> emailSettings) : IEmailSenderService
+public class EmailSenderService(IAmazonSimpleEmailService sesClient, ILogger<ReportSenderService> logger, IOptions<EmailSettings> emailSettings) : IEmailSenderService
 {
     public async Task SendEmailAsync(string reportContent, string fileName, string mimeType)
     {
