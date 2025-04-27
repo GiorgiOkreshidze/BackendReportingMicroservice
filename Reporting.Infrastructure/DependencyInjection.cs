@@ -1,5 +1,6 @@
 using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.DataModel;
+using Amazon.SimpleEmail;
 using Amazon.SQS;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -27,6 +28,7 @@ public static class DependencyInjection
             DynamoDbFactory.CreateDynamoDbContext(sp.GetRequiredService<IAmazonDynamoDB>()));
 
         services.AddSingleton<IAmazonSQS>(_ => SqsFactory.CreateSqsClient(credentials));
+        services.AddSingleton<IAmazonSimpleEmailService>(_ => SesFactory.CreateSesClient(credentials));
         
         services.AddScoped<IReportRepository, ReportRepository>();
 
