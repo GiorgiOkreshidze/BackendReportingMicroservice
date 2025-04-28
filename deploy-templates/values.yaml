@@ -143,3 +143,8 @@ env:
         secretKeyRef:
           name: run7team2-emails-secret
           key: to-email
+    - name: SQS_QUEUE_URL
+      valueFrom:
+        secretKeyRef:
+          name: run7team2-aws-sqs-secret
+          key: aws-sqs-queue-url
