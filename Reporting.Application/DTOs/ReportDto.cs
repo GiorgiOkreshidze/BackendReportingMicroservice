@@ -10,7 +10,7 @@
 
         public required string WaiterEmail { get; set; }
 
-        public required int HoursWorked { get; set; }
+        public required double HoursWorked { get; set; }
 
         public required double AverageServiceFeedback { get; set; }
 

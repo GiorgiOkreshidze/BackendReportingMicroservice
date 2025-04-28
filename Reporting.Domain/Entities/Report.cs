@@ -27,7 +27,7 @@ public class Report
     public required string WaiterEmail { get; set; }
         
     [DynamoDBProperty("hoursWorked")]
-    public required int HoursWorked { get; set; }
+    public required double HoursWorked { get; set; }
     
     [DynamoDBProperty("averageServiceFeedback")]
     public required double AverageServiceFeedback { get; set; }
