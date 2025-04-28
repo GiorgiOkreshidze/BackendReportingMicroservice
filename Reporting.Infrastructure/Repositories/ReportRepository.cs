@@ -36,4 +36,28 @@ public class ReportRepository(IDynamoDBContext context, ILogger<ReportRepository
             throw new ReportRetrievalException("An error occurred while retrieving reports from DynamoDB.", ex);
         }
     }
+
+    public async Task SaveReportAsync(Report report, CancellationToken cancellationToken = default)
+    {
+        try 
+        { 
+            await context.SaveAsync(report, cancellationToken);
+            logger.LogInformation("Successfully saved report to DynamoDB for waiter {Waiter}", report.Waiter);
+        }
+        catch (AmazonDynamoDBException ex)
+        {
+            logger.LogError(ex, "DynamoDB-specific error occurred while saving report for waiter {Waiter}", report.Waiter);
+            throw new ReportSaveException("An error occurred while saving the report to DynamoDB.", ex);
+        }
+        catch (OperationCanceledException ex) when (cancellationToken.IsCancellationRequested)
+        {
+            logger.LogError(ex,"Save operation was canceled for waiter {Waiter}", report.Waiter);
+            throw;
+        }
+        catch (Exception ex) 
+        {
+            logger.LogError(ex, "Unexpected error saving report to DynamoDB for waiter {Waiter}", report.Waiter);
+            throw new ReportSaveException("An unexpected error occurred while saving the report.", ex);
+        }
+    }
 }
