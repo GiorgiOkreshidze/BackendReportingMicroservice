@@ -1,6 +1,7 @@
 using Microsoft.OpenApi.Models;
 using Reporting.Application;
 using Reporting.Application.BackgroundServices;
+using Reporting.Application.DTOs;
 using Reporting.Application.DTOs.Emails;
 using Reporting.Application.Interfaces;
 using Reporting.Infrastructure;
@@ -24,12 +25,16 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-builder.Services.Configure<EmailSettings>(options => {
-    options.FromEmail = Environment.GetEnvironmentVariable("FROM_EMAIL") ?? throw new ArgumentNullException(nameof(EmailSettings.FromEmail), "FROM_EMAIL environment variable is not set");
-    options.ToEmail = Environment.GetEnvironmentVariable("TO_EMAIL") ?? throw new ArgumentNullException(nameof(EmailSettings.ToEmail), "TO_EMAIL environment variable is not set");
-});
+// builder.Services.Configure<EmailSettings>(options => {
+//     options.FromEmail = Environment.GetEnvironmentVariable("FROM_EMAIL") ?? throw new ArgumentNullException(nameof(EmailSettings.FromEmail), "FROM_EMAIL environment variable is not set");
+//     options.ToEmail = Environment.GetEnvironmentVariable("TO_EMAIL") ?? throw new ArgumentNullException(nameof(EmailSettings.ToEmail), "TO_EMAIL environment variable is not set");
+// });
 
+builder.Services.Configure<AwsSettings>(options => {
+    options.SqsQueueUrl = Environment.GetEnvironmentVariable("SQS_QUEUE_URL") ?? throw new ArgumentNullException(nameof(AwsSettings.SqsQueueUrl), "SQS_QUEUE_URL environment variable is not set");
+});
 builder.Services.AddHostedService<ReportSenderBackgroundService>();
+builder.Services.AddHostedService<SqsMessageProcessingService>();
 
 var app = builder.Build();
 

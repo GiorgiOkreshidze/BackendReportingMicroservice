@@ -15,8 +15,8 @@ public class ReportSenderBackgroundService(
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         logger.LogInformation("ReportSenderBackgroundService is starting.");
-    
-        while (!stoppingToken.IsCancellationRequested)
+
+        /*while (!stoppingToken.IsCancellationRequested)
         {
             using var scope = serviceScopeFactory.CreateScope();
             var reportService = scope.ServiceProvider.GetRequiredService<IReportServiceSender>();
@@ -26,13 +26,13 @@ public class ReportSenderBackgroundService(
                 var now = DateTime.UtcNow;
                 var nextRun = now.AddMinutes(1);
                 var delay = nextRun - now;
-    
+
                 if (delay.TotalMilliseconds > 0)
                 {
                     logger.LogInformation("Waiting until {NextRun} to send report.", nextRun);
                     await Task.Delay(delay, stoppingToken);
                 }
-    
+
                 logger.LogInformation("Sending weekly report at {Time}.", DateTime.UtcNow);
                 await  reportService.SendReportEmailAsync();
             }
@@ -40,13 +40,13 @@ public class ReportSenderBackgroundService(
             {
                 logger.LogError(ex, "Error occurred while sending report.");
             }
-        }
-    
+        }*/
+
         logger.LogInformation("ReportSenderBackgroundService is stopping.");
     }
-    
+
     //ONE WEEK -> Report will be generated every Monday at midnight
-    
+
     /*
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
