@@ -54,6 +54,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseHttpsRedirection();
+app.UseCors();
+
 app.MapGet("/", () => "Hello World!");
 app.MapPost("/send-report", async (IReportServiceSender reportSenderService, ILogger<Program> logger) =>
 {
@@ -69,8 +72,5 @@ app.MapPost("/send-report", async (IReportServiceSender reportSenderService, ILo
         return Results.Problem("Failed to send report.", statusCode: 500);
     }
 });
-
-app.UseHttpsRedirection();
-app.UseCors();
 
 app.Run();
