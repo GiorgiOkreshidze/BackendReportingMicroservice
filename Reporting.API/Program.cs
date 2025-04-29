@@ -35,7 +35,16 @@ builder.Services.Configure<AwsSettings>(options => {
 });
 builder.Services.AddHostedService<ReportSenderBackgroundService>();
 builder.Services.AddHostedService<SqsMessageProcessingService>();
-
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(builder =>
+    {
+        builder.WithOrigins("http://localhost:8080", "https://restaurants-run7team2-api-handler-dev.development.krci-dev.cloudmentor.academy") // Allow requests from this origin
+               .AllowAnyHeader()
+               .AllowAnyMethod()
+               .AllowCredentials();
+    });
+});
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -62,5 +71,6 @@ app.MapPost("/send-report", async (IReportServiceSender reportSenderService, ILo
 });
 
 app.UseHttpsRedirection();
+app.UseCors();
 
 app.Run();
