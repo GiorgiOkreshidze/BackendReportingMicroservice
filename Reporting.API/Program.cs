@@ -39,7 +39,7 @@ builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(builder =>
     {
-        builder.WithOrigins("http://localhost:8080", "https://restaurants-run7team2-api-handler-dev.development.krci-dev.cloudmentor.academy") // Allow requests from this origin
+        builder.WithOrigins("http://localhost:8080","http://restaurants-run7team2-api-handler-dev.development.krci-dev.cloudmentor.academy", "https://restaurants-run7team2-api-handler-dev.development.krci-dev.cloudmentor.academy") // Allow requests from this origin
                .AllowAnyHeader()
                .AllowAnyMethod()
                .AllowCredentials();
