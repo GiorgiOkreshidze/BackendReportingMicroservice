@@ -75,7 +75,11 @@ public class ReportProcessService : IReportProcessService
 
             waiterSummaries[key].PreviousHours += report.HoursWorked;
             waiterSummaries[key].PreviousAverageServiceFeedback += report.AverageServiceFeedback;
-            previousFeedbackCount[key]++;
+            if(report.AverageServiceFeedback > 0)
+            {
+                previousFeedbackCount[key]++;
+            }
+            
         }
     }
 
@@ -90,9 +94,14 @@ public class ReportProcessService : IReportProcessService
 
             waiterSummaries[key].CurrentHours += report.HoursWorked;
             waiterSummaries[key].CurrentAverageServiceFeedback += report.AverageServiceFeedback;
-            currentFeedbackCount[key]++;
-
-            waiterSummaries[key].MinimumServiceFeedback = Math.Min(waiterSummaries[key].MinimumServiceFeedback, report.MinimumServiceFeedback);
+            if(report.AverageServiceFeedback > 0)
+            {
+                currentFeedbackCount[key]++;
+            }
+            if(report.MinimumServiceFeedback > 0)
+            {
+                waiterSummaries[key].MinimumServiceFeedback = Math.Min(waiterSummaries[key].MinimumServiceFeedback, report.MinimumServiceFeedback);
+            }
         }
     }
     

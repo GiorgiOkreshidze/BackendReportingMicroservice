@@ -12,8 +12,9 @@ public class ReportSenderService(
 {
     public async Task SendReportEmailAsync()
     {
-        var currentWeekStart = DateTime.UtcNow.Date.AddDays(-(int)DateTime.UtcNow.DayOfWeek);
-        var currentWeekEnd = currentWeekStart.AddDays(6);
+        var yesterday = DateTime.UtcNow.Date.AddDays(-1);
+        var currentWeekStart = yesterday.AddDays(-6);
+        var currentWeekEnd = yesterday;
         var previousWeekStart = currentWeekStart.AddDays(-7);
         var previousWeekEnd = currentWeekEnd.AddDays(-7);
 
