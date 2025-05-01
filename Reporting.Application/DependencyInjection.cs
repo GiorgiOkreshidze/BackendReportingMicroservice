@@ -13,7 +13,7 @@ public static class DependencyInjection
         services.AddSingleton<AmazonSimpleEmailServiceClient>();
         
         services.AddScoped<IReportServiceSender, ReportSenderService>();
-        services.AddScoped<IReportGenerator, ExcelReportGenerator>();
+        services.AddScoped<IReportGenerator, ReportGenerator>();
         services.AddScoped<IEmailSenderService, EmailSenderService>();
         services.AddScoped<IReportProcessService, ReportProcessService>();
         

@@ -1,8 +1,10 @@
 using Microsoft.OpenApi.Models;
+using Reporting.API.Endpoints;
 using Reporting.Application;
 using Reporting.Application.BackgroundServices;
 using Reporting.Application.DTOs;
 using Reporting.Application.DTOs.Emails;
+using Reporting.Application.Formatters.Interfaces;
 using Reporting.Application.Interfaces;
 using Reporting.Infrastructure;
 
@@ -20,8 +22,8 @@ builder.Services.AddSwaggerGen(c =>
     c.SwaggerDoc("v1", new OpenApiInfo
     {
         Version = "v1",
-        Title = "Restaurant Api",
-        Description = "A Web API for managing restaurant operations",
+        Title = "Restaurant Reporting Service Api",
+        Description = "A Web API for managing restaurant reporting operations",
     });
 });
 
@@ -58,19 +60,6 @@ app.UseHttpsRedirection();
 app.UseCors();
 
 app.MapGet("/", () => "Hello World!");
-app.MapPost("/send-report", async (IReportServiceSender reportSenderService, ILogger<Program> logger) =>
-{
-    try
-    {
-        logger.LogInformation("Received request to send report via /send-report endpoint.");
-        await reportSenderService.SendReportEmailAsync();
-        return Results.Ok("Report sent successfully.");
-    }
-    catch (Exception ex)
-    {
-        logger.LogError(ex, "Failed to send report via /send-report endpoint.");
-        return Results.Problem("Failed to send report.", statusCode: 500);
-    }
-});
-
+app.MapReportEndpoints();
 app.Run();
+
