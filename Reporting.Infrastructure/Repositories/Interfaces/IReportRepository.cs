@@ -8,6 +8,6 @@ public interface IReportRepository
 
     Task SaveReportAsync(Report report, CancellationToken cancellationToken = default);
 
-    Task<IEnumerable<Report>> RetrieveReportsForAdmin(DateTime startDate, DateTime endDate, string? location);
+    Task<IEnumerable<Report>> RetrieveReportsForAdmin(DateTime startDate, DateTime endDate, string? locationId);
 
 }
