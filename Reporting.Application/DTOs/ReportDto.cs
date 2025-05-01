@@ -3,7 +3,9 @@
     public class ReportDto
     {
         public required string Location { get; set; }
-
+        
+        public required string LocationId { get; set; }
+        
         public required string Date { get; set; }
 
         public required string Waiter { get; set; }

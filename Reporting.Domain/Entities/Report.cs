@@ -16,6 +16,9 @@ public class Report
 
     [DynamoDBProperty("location")]
     public required string Location { get; set; }
+    
+    [DynamoDBProperty("locationId")]
+    public required string LocationId { get; set; }
         
     [DynamoDBProperty("date")]
     public required string Date { get; set; }

@@ -105,6 +105,7 @@ namespace Reporting.Application.BackgroundServices
                         Id = id,
                         Date = reportDto.Date,
                         Location = reportDto.Location,
+                        LocationId = reportDto.LocationId,
                         Waiter = reportDto.Waiter,
                         WaiterEmail = reportDto.WaiterEmail,
                         HoursWorked = reportDto.HoursWorked,
