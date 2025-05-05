@@ -55,11 +55,11 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
+// lets check
 app.UseHttpsRedirection();
 app.UseCors();
 
-app.MapGet("/", () => "Hello World!");
+app.MapGet("/", () => "Hello!");
 app.MapReportEndpoints();
 app.Run();
 
