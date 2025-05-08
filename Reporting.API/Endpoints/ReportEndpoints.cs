@@ -26,16 +26,26 @@ public class ReportEndpoints
             // Validate required parameters
             if (request.StartDate == null || request.EndDate == null)
             {
-                return Results.BadRequest("Both startDate and endDate parameters are required");
+                return Results.BadRequest(new { Message = "Both startDate and endDate parameters are required"});
             }
 
+            if (!TryParseIsoDate(request.StartDate, out DateTime startDate))
+            {
+                return Results.BadRequest(new { Message ="startDate must be in ISO format (YYYY-MM-DD)"});
+            }
+        
+            if (!TryParseIsoDate(request.EndDate, out DateTime endDate))
+            {
+                return Results.BadRequest(new { Message ="endDate must be in ISO format (YYYY-MM-DD)"});
+            }
+            
             logger.LogInformation("Retrieving reports from {StartDate} to {EndDate}{LocationFilter}",
                 request.StartDate, request.EndDate, 
                 !string.IsNullOrEmpty(request.LocationId) ? $" for location '{request.LocationId}'" : "");
 
             var result = await reportSenderService.SendReportToAdminAsync(
-                request.StartDate.Value, 
-                request.EndDate.Value, 
+                startDate, 
+                endDate, 
                 request.LocationId);
                 
             return Results.Ok(result);
@@ -51,7 +61,16 @@ public class ReportEndpoints
             return Results.Problem("Failed to retrieve reports.", statusCode: 500);
         }
     }
-    
+    private static bool TryParseIsoDate(string dateString, out DateTime date)
+    {
+        // ISO format YYYY-MM-DD
+        return DateTime.TryParseExact(
+            dateString,
+            "yyyy-MM-dd", 
+            System.Globalization.CultureInfo.InvariantCulture,
+            System.Globalization.DateTimeStyles.None, 
+            out date);
+    }
     private static async Task<IResult> SendReport(
         IReportServiceSender reportSenderService, 
         ILogger<ReportEndpoints> logger)
@@ -60,7 +79,7 @@ public class ReportEndpoints
         {
             logger.LogInformation("Received request to send report");
             await reportSenderService.SendReportEmailAsync();
-            return Results.Ok("Report sent successfully.");
+            return Results.Ok(new {Message = "Report sent successfully."});
         }
         catch (Exception ex)
         {
