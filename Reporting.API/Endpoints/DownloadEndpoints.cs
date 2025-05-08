@@ -25,13 +25,23 @@ public class DownloadEndpoints
             // Validate required parameters
             if (request.StartDate == null || request.EndDate == null)
             {
-                return Results.BadRequest("Both startDate and endDate parameters are required");
+                return Results.BadRequest( new { Message = "Both startDate and endDate parameters are required"});
+            }
+            
+            if (!TryParseIsoDate(request.StartDate, out DateTime startDate))
+            {
+                return Results.BadRequest(new { Message ="startDate must be in ISO format (YYYY-MM-DD)"});
+            }
+        
+            if (!TryParseIsoDate(request.EndDate, out DateTime endDate))
+            {
+                return Results.BadRequest(new { Message ="endDate must be in ISO format (YYYY-MM-DD)"});
             }
 
             if (string.IsNullOrEmpty(request.Format) || 
                 !new[] { "excel", "pdf", "csv" }.Contains(request.Format.ToLower()))
             {
-                return Results.BadRequest("Format must be one of: excel, pdf, csv");
+                return Results.BadRequest(new { Message ="Format must be one of: excel, pdf, csv"});
             }
 
             logger.LogInformation("Generating {Format} report from {StartDate} to {EndDate}{LocationFilter}",
@@ -42,8 +52,8 @@ public class DownloadEndpoints
 
             // Get the report data
             var reportData = await reportSenderService.SendReportToAdminAsync(
-                request.StartDate.Value,
-                request.EndDate.Value,
+                startDate,
+                endDate,
                 request.LocationId);
 
             return await GenerateAndReturnFile(reportData, request, reportGenerator);
@@ -59,7 +69,16 @@ public class DownloadEndpoints
             return Results.Problem("Failed to generate report.", statusCode: 500);
         }
     }
-    
+    private static bool TryParseIsoDate(string dateString, out DateTime date)
+    {
+        // ISO format YYYY-MM-DD
+        return DateTime.TryParseExact(
+            dateString,
+            "yyyy-MM-dd", 
+            System.Globalization.CultureInfo.InvariantCulture,
+            System.Globalization.DateTimeStyles.None, 
+            out date);
+    }
     private static async Task<IResult> GenerateAndReturnFile(
         List<SummaryEntry> reportData, 
         ReportDownloadRequest request, 
