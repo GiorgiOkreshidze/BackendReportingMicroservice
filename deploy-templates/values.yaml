@@ -148,3 +148,23 @@ env:
         secretKeyRef:
           name: run7team2-aws-sqs-secret
           key: aws-sqs-queue-url
+    - name: CONNECTION_STRING_STANDARD
+      valueFrom:
+        secretKeyRef:
+          name: mongodb-admin-admin-user
+          key: connectionString.standard
+    - name: CONNECTION_STRING_STANDARD_SRV
+      valueFrom:
+        secretKeyRef:
+          name: mongodb-admin-admin-user
+          key: connectionString.standardSrv
+    - name: USERNAME
+      valueFrom:
+        secretKeyRef:
+          name: mongodb-admin-admin-user
+          key: username
+    - name: PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: mongodb-admin-admin-user
+          key: password
