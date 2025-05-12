@@ -37,8 +37,8 @@ builder.Services.Configure<AwsSettings>(options => {
 
 builder.Services.Configure<RabbitMqSettings>(options => {
     options.HostName = Environment.GetEnvironmentVariable("HOST_NAME") ?? throw new ArgumentNullException(nameof(RabbitMqSettings.HostName), "HOST_NAME environment variable is not set");
-    options.UserName = Environment.GetEnvironmentVariable("USER_NAME") ?? throw new ArgumentNullException(nameof(RabbitMqSettings.UserName), "USER_NAME environment variable is not set");
-    options.Password = Environment.GetEnvironmentVariable("PASSWORD") ?? throw new ArgumentNullException(nameof(RabbitMqSettings.Password), "PASSWORD environment variable is not set");
+    options.UserName = Environment.GetEnvironmentVariable("RABBIT_MQ_USER_NAME") ?? throw new ArgumentNullException(nameof(RabbitMqSettings.UserName), "RABBIT_MQ_USER_NAME environment variable is not set");
+    options.Password = Environment.GetEnvironmentVariable("RABBIT_MQ_PASSWORD") ?? throw new ArgumentNullException(nameof(RabbitMqSettings.Password), "RABBIT_MQ_PASSWORD environment variable is not set");
     
     if (int.TryParse(Environment.GetEnvironmentVariable("PORT"), out int port))
         options.Port = port;
@@ -68,7 +68,7 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseCors();
 
-app.MapGet("/", () => "Hello!");
+app.MapGet("/", () => "Hello world!");
 app.MapReportEndpoints();
 app.Run();
 
