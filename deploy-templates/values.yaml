@@ -178,12 +178,12 @@ env:
         secretKeyRef:
           name: rabbitmq-default-user
           key: port
-    - name: PASSWORD
+    - name: RABBIT_MQ_PASSWORD
       valueFrom:
         secretKeyRef:
           name: rabbitmq-default-user
-          key: password'
-    - name: USERNAME
+          key: password
+    - name: RABBIT_MQ_USERNAME
       valueFrom:
         secretKeyRef:
           name: rabbitmq-default-user
