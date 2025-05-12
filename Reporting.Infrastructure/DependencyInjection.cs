@@ -4,9 +4,12 @@ using Amazon.SimpleEmail;
 using Amazon.SQS;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Reporting.Infrastructure.AWS;
+using Reporting.Infrastructure.MongoDB;
 using Reporting.Infrastructure.Repositories;
 using Reporting.Infrastructure.Repositories.Interfaces;
+using MongoDB.Driver;
 
 namespace Reporting.Infrastructure;
 
@@ -26,6 +29,27 @@ public static class DependencyInjection
         services.AddSingleton<IAmazonDynamoDB>(_ => DynamoDbFactory.CreateDynamoDbClient(credentials));
         services.AddSingleton<IDynamoDBContext>(sp =>
             DynamoDbFactory.CreateDynamoDbContext(sp.GetRequiredService<IAmazonDynamoDB>()));
+        
+        services.Configure<MongoDbSettings>(options =>
+        {
+            options.ConnectionString = Environment.GetEnvironmentVariable("CONNECTION_STRING_STANDARD_SRV") ?? 
+                                       Environment.GetEnvironmentVariable("CONNECTION_STRING_STANDARD") ?? 
+                                       "mongodb://localhost:27017";
+            options.DatabaseName = "RestaurantDb";
+        });
+        
+        services.AddSingleton<IMongoClient>(sp =>
+        {
+            var settings = sp.GetRequiredService<IOptions<MongoDbSettings>>().Value;
+            return new MongoClient(settings.ConnectionString);
+        });
+
+        services.AddSingleton(sp =>
+        {
+            var client = sp.GetRequiredService<IMongoClient>();
+            var settings = sp.GetRequiredService<IOptions<MongoDbSettings>>().Value;
+            return client.GetDatabase(settings.DatabaseName);
+        });
 
         services.AddSingleton<IAmazonSQS>(_ => SqsFactory.CreateSqsClient(credentials));
         services.AddSingleton<IAmazonSimpleEmailService>(_ => SesFactory.CreateSesClient(credentials));

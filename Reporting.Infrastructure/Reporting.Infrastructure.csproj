@@ -18,6 +18,8 @@
       <PackageReference Include="AWSSDK.SQS" Version="3.7.400.138" />
       <PackageReference Include="Microsoft.Extensions.Configuration" Version="9.0.4" />
       <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.4" />
+      <PackageReference Include="Microsoft.Extensions.Options" Version="9.0.4" />
+      <PackageReference Include="MongoDB.Driver" Version="3.4.0" />
     </ItemGroup>
 
 </Project>
