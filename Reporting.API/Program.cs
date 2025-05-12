@@ -4,9 +4,8 @@ using Reporting.Application;
 using Reporting.Application.BackgroundServices;
 using Reporting.Application.DTOs;
 using Reporting.Application.DTOs.Emails;
-using Reporting.Application.Formatters.Interfaces;
-using Reporting.Application.Interfaces;
 using Reporting.Infrastructure;
+using Reporting.Infrastructure.RabbitMq;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -35,8 +34,18 @@ builder.Services.Configure<EmailSettings>(options => {
 builder.Services.Configure<AwsSettings>(options => {
     options.SqsQueueUrl = Environment.GetEnvironmentVariable("SQS_QUEUE_URL") ?? throw new ArgumentNullException(nameof(AwsSettings.SqsQueueUrl), "SQS_QUEUE_URL environment variable is not set");
 });
+
+builder.Services.Configure<RabbitMqSettings>(options => {
+    options.HostName = Environment.GetEnvironmentVariable("HOST_NAME") ?? throw new ArgumentNullException(nameof(RabbitMqSettings.HostName), "HOST_NAME environment variable is not set");
+    options.UserName = Environment.GetEnvironmentVariable("USER_NAME") ?? throw new ArgumentNullException(nameof(RabbitMqSettings.UserName), "USER_NAME environment variable is not set");
+    options.Password = Environment.GetEnvironmentVariable("PASSWORD") ?? throw new ArgumentNullException(nameof(RabbitMqSettings.Password), "PASSWORD environment variable is not set");
+    
+    if (int.TryParse(Environment.GetEnvironmentVariable("PORT"), out int port))
+        options.Port = port;
+});
+
 builder.Services.AddHostedService<ReportSenderBackgroundService>();
-builder.Services.AddHostedService<SqsMessageProcessingService>();
+builder.Services.AddHostedService<RabbitMqMessageProcessingService>();
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(builder =>

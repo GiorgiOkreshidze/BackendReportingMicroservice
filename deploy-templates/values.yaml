@@ -168,3 +168,23 @@ env:
         secretKeyRef:
           name: mongodb-admin-admin-user
           key: password
+    - name: HOST_NAME
+      valueFrom:
+        secretKeyRef:
+          name: rabbitmq-default-user
+          key: host
+    - name: PORT
+      valueFrom:
+        secretKeyRef:
+          name: rabbitmq-default-user
+          key: port
+    - name: PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: rabbitmq-default-user
+          key: password'
+    - name: USERNAME
+      valueFrom:
+        secretKeyRef:
+          name: rabbitmq-default-user
+          key: username
