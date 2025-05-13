@@ -42,6 +42,7 @@ protected override async Task ExecuteAsync(CancellationToken stoppingToken)
             {
                 var body = ea.Body.ToArray();
                 var message = Encoding.UTF8.GetString(body);
+                logger.LogInformation("Received message: {Message}", message);
 
                 try
                 {

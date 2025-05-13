@@ -42,29 +42,18 @@ public class EmailSenderService(IAmazonSimpleEmailService sesClient, ILogger<Rep
     {
         var boundary = "----=_Part_" + Guid.NewGuid().ToString();
         var emailBuilder = new StringBuilder();
-        emailBuilder.AppendLine($"From: {emailSettings.Value.FromEmail}");
-        emailBuilder.AppendLine($"To: {emailSettings.Value.ToEmail}");
-        emailBuilder.AppendLine("Subject: Weekly Report Summary");
-        emailBuilder.AppendLine($"MIME-Version: 1.0");
-        emailBuilder.AppendLine($"Content-Type: multipart/mixed; boundary=\"{boundary}\"");
-        emailBuilder.AppendLine();
-        emailBuilder.AppendLine($"--{boundary}");
-        emailBuilder.AppendLine("Content-Type: text/plain; charset=UTF-8");
-        emailBuilder.AppendLine();
-        emailBuilder.AppendLine("Please find the attached weekly report.");
-        emailBuilder.AppendLine();
-        emailBuilder.AppendLine($"--{boundary}");
-        emailBuilder.AppendLine($"Content-Type: {mimeType}; name=\"{fileName}\"");
-        emailBuilder.AppendLine("Content-Disposition: attachment; filename=\"" + fileName + "\"");
-        emailBuilder.AppendLine("Content-Transfer-Encoding: base64");
-        emailBuilder.AppendLine();
+        
+        AppendHeaders(emailBuilder, boundary, "Weekly Report Summary");
+        AppendTextBody(emailBuilder, boundary, "Please find the attached weekly report.");
+        AppendAttachmentHeader(emailBuilder, boundary, mimeType, fileName);
+
         emailBuilder.AppendLine(Convert.ToBase64String(attachment.ToArray(), Base64FormattingOptions.InsertLineBreaks));
         emailBuilder.AppendLine();
         emailBuilder.AppendLine($"--{boundary}--");
 
         return new MemoryStream(Encoding.UTF8.GetBytes(emailBuilder.ToString()));
     }
-    
+
     public async Task SendEmailWithMultipleAttachmentsAsync(List<(string Content, string FileName, string MimeType)> attachments)
     {
         try
@@ -92,30 +81,14 @@ public class EmailSenderService(IAmazonSimpleEmailService sesClient, ILogger<Rep
         var boundary = "----=_Part_" + Guid.NewGuid().ToString();
         var emailBuilder = new StringBuilder();
         
-        // Email headers
-        emailBuilder.AppendLine($"From: {emailSettings.Value.FromEmail}");
-        emailBuilder.AppendLine($"To: {emailSettings.Value.ToEmail}");
-        emailBuilder.AppendLine("Subject: Weekly Restaurant Reports");
-        emailBuilder.AppendLine($"MIME-Version: 1.0");
-        emailBuilder.AppendLine($"Content-Type: multipart/mixed; boundary=\"{boundary}\"");
-        emailBuilder.AppendLine();
-        
-        // Email body
-        emailBuilder.AppendLine($"--{boundary}");
-        emailBuilder.AppendLine("Content-Type: text/plain; charset=UTF-8");
-        emailBuilder.AppendLine();
-        emailBuilder.AppendLine("Please find the attached weekly restaurant reports.");
-        emailBuilder.AppendLine();
+        AppendHeaders(emailBuilder, boundary, "Weekly Restaurant Reports");
+        AppendTextBody(emailBuilder, boundary, "Please find the attached weekly restaurant report.");
         
         // Add each attachment
         foreach (var (content, fileName, mimeType) in attachments)
         {
-            emailBuilder.AppendLine($"--{boundary}");
-            emailBuilder.AppendLine($"Content-Type: {mimeType}; name=\"{fileName}\"");
-            emailBuilder.AppendLine("Content-Disposition: attachment; filename=\"" + fileName + "\"");
-            emailBuilder.AppendLine("Content-Transfer-Encoding: base64");
-            emailBuilder.AppendLine();
-            
+            AppendAttachmentHeader(emailBuilder, boundary, mimeType, fileName);
+
             // Convert content to base64
             byte[] fileBytes = mimeType == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                 ? Convert.FromBase64String(content)
@@ -129,5 +102,34 @@ public class EmailSenderService(IAmazonSimpleEmailService sesClient, ILogger<Rep
         emailBuilder.AppendLine($"--{boundary}--");
 
         return new MemoryStream(Encoding.UTF8.GetBytes(emailBuilder.ToString()));
+    }
+
+    private static void AppendAttachmentHeader(StringBuilder emailBuilder, string boundary, string mimeType,
+        string fileName)
+    {
+        emailBuilder.AppendLine($"--{boundary}");
+        emailBuilder.AppendLine($"Content-Type: {mimeType}; name=\"{fileName}\"");
+        emailBuilder.AppendLine("Content-Disposition: attachment; filename=\"" + fileName + "\"");
+        emailBuilder.AppendLine("Content-Transfer-Encoding: base64");
+        emailBuilder.AppendLine();
+    }
+
+    private void AppendHeaders(StringBuilder emailBuilder, string boundary, string subject)
+    {
+        emailBuilder.AppendLine($"From: {emailSettings.Value.FromEmail}");
+        emailBuilder.AppendLine($"To: {emailSettings.Value.ToEmail}");
+        emailBuilder.AppendLine($"Subject: {subject}");
+        emailBuilder.AppendLine($"MIME-Version: 1.0");
+        emailBuilder.AppendLine($"Content-Type: multipart/mixed; boundary=\"{boundary}\"");
+        emailBuilder.AppendLine();
+    }
+    
+    private static void AppendTextBody(StringBuilder builder, string boundary, string bodyText)
+    {
+        builder.AppendLine($"--{boundary}");
+        builder.AppendLine("Content-Type: text/plain; charset=UTF-8");
+        builder.AppendLine();
+        builder.AppendLine(bodyText);
+        builder.AppendLine();
     }
 }
