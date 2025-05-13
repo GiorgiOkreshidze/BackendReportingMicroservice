@@ -1,8 +1,9 @@
 ﻿using MongoDB.Bson.Serialization.Attributes;
+using Reporting.Domain.Shared;
 
 namespace Reporting.Domain.Entities;
 
-public class Report
+public class Report : ReportBase
 {
     [BsonId]
     public required string Partition { get; set; } = "weekly";
@@ -10,28 +11,4 @@ public class Report
     public required string DateId { get; set; }
     
     public required string Id { get; set; }
-
-    public required string Location { get; set; }
-    
-    public required string LocationId { get; set; }
-        
-    public required string Date { get; set; }
-        
-    public required string Waiter { get; set; }
-        
-    public required string WaiterEmail { get; set; }
-        
-    public required double HoursWorked { get; set; }
-    
-    public required string OrderId { get; set; }
-    
-    public required decimal OrderRevenue { get; set; }
-    
-    public required double AverageServiceFeedback { get; set; }
-    
-    public required double AverageCuisineFeedback { get; set; }
-    
-    public required int MinimumCuisineFeedback { get; set; }
-
-    public required int MinimumServiceFeedback { get; set; }
 }

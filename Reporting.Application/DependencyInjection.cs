@@ -16,6 +16,9 @@ public static class DependencyInjection
         services.AddScoped<IReportGenerator, ReportGenerator>();
         services.AddScoped<IEmailSenderService, EmailSenderService>();
         services.AddScoped<IReportProcessService, ReportProcessService>();
+        services.AddScoped<ICsvReportGenerator, CsvReportGenerator>();
+        services.AddScoped<IPdfReportGenerator, PdfReportGenerator>();
+        services.AddScoped<IExcelReportGenerator, ExcelReportGenerator>();
         
         return services;
     }
