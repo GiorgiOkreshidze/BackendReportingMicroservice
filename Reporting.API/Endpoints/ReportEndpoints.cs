@@ -10,7 +10,7 @@ public class ReportEndpoints
         var group = app.MapGroup("/reports").WithTags("Reports");
         
         group.MapGet("/", GetReports)
-            .WithDescription("Get reports by date range and optional location");
+            .WithDescription("Get reports by date range and optional location and report type");
              
         group.MapPost("/send", SendReport)
             .WithDescription("Manually trigger report sending");
@@ -39,6 +39,14 @@ public class ReportEndpoints
                 return Results.BadRequest(new { Message ="endDate must be in ISO format (YYYY-MM-DD)"});
             }
             
+            // Validate ReportType
+            if (!string.IsNullOrEmpty(request.ReportType) && 
+                request.ReportType != "Sales" && 
+                request.ReportType != "Performance")
+            {
+                return Results.BadRequest(new { Message = "ReportType must be either 'Sales' or 'Performance'" });
+            }
+            
             logger.LogInformation("Retrieving reports from {StartDate} to {EndDate}{LocationFilter}",
                 request.StartDate, request.EndDate, 
                 !string.IsNullOrEmpty(request.LocationId) ? $" for location '{request.LocationId}'" : "");
@@ -47,8 +55,19 @@ public class ReportEndpoints
                 startDate, 
                 endDate, 
                 request.LocationId);
-                
-            return Results.Ok(result);
+            
+            if (string.IsNullOrEmpty(request.ReportType))
+            {
+                return Results.Ok(new
+                {
+                    Sales = result.LocationSummaries,
+                    Performance = result.WaiterSummaries
+                });
+            }
+            
+            return request.ReportType == "Sales" 
+                ? Results.Ok(result.LocationSummaries) 
+                : Results.Ok(result.WaiterSummaries);
         }
         catch (ArgumentException ex)
         {

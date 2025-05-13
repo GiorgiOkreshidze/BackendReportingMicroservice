@@ -22,17 +22,26 @@ Console.WriteLine($"week start email to {currentWeekStart}");
         var currentWeekItems = await reportRepository.RetrieveReports(currentWeekStart, currentWeekEnd);
         var previousWeekItems = await reportRepository.RetrieveReports(previousWeekStart, previousWeekEnd);
 
-        var summary = reportProcessService.ProcessReports(currentWeekItems, previousWeekItems, currentWeekStart, currentWeekEnd);
+        var (waiterSummaries, locationSummaries) = await reportProcessService
+            .ProcessReports(currentWeekItems, previousWeekItems, currentWeekStart, currentWeekEnd);
+        
+        var waiterReportContent = await reportGenerator.GenerateWaiterReportAsync(waiterSummaries);
+        var locationReportContent = await reportGenerator.GenerateLocationReportAsync(locationSummaries);
 
-        var reportContent = await reportGenerator.GenerateReportAsync(summary);
 
-        const string fileName = "report.xlsx";
-        const string mimeType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+        // Prepare attachments list
+        var attachments = new List<(string Content, string FileName, string MimeType)>
+        {
+            (waiterReportContent, "waiter_report.xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"),
+            (locationReportContent, "location_report.xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+        };
 
-        await emailSenderService.SendEmailAsync(reportContent, fileName, mimeType);
+        // Send email with both attachments
+        await emailSenderService.SendEmailWithMultipleAttachmentsAsync(attachments);
     }
 
-    public async Task<List<SummaryEntry>> SendReportToAdminAsync(DateTime startDate, DateTime endDate, string? locationId)
+    public async Task<(List<SummaryEntry> WaiterSummaries, List<LocationSummary> LocationSummaries)> SendReportToAdminAsync(
+        DateTime startDate, DateTime endDate, string? locationId)
     {
         // Validate the date range
         if (startDate >= endDate)
@@ -52,7 +61,7 @@ Console.WriteLine($"week start email to {currentWeekStart}");
 
         // Calculate the date range length
         int rangeDays = (endDate.Date - startDate.Date).Days;
-        
+
         // Calculate previous period with exactly the same length
         var previousPeriodEnd = startDate.Date.AddDays(-1);
         var previousPeriodStart = previousPeriodEnd.AddDays(-rangeDays);
@@ -61,14 +70,11 @@ Console.WriteLine($"week start email to {currentWeekStart}");
         var currentPeriodReports = await reportRepository.RetrieveReportsForAdmin(startDate, endDate, locationId);
         var previousPeriodReports = await reportRepository.RetrieveReportsForAdmin(previousPeriodStart, previousPeriodEnd, locationId);
 
-        // Process the reports to create a summary
-        var summary = reportProcessService.ProcessReports(
-            currentPeriodReports.ToList(), 
-            previousPeriodReports.ToList(), 
-            startDate, 
+        // Process the reports to create summaries
+        return await reportProcessService.ProcessReports(
+            currentPeriodReports.ToList(),
+            previousPeriodReports.ToList(),
+            startDate,
             endDate);
-
-        // Generate the report content
-        return summary;
     }
 }

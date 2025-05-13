@@ -6,5 +6,5 @@ public interface IReportServiceSender
 {
    Task SendReportEmailAsync();
 
-    Task<List<SummaryEntry>> SendReportToAdminAsync(DateTime startDate, DateTime endDate, string? locationId);
+   Task<(List<SummaryEntry> WaiterSummaries, List<LocationSummary> LocationSummaries)> SendReportToAdminAsync(DateTime startDate, DateTime endDate, string? locationId);
 }

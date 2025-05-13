@@ -27,8 +27,10 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 builder.Services.Configure<EmailSettings>(options => {
-    options.FromEmail = Environment.GetEnvironmentVariable("FROM_EMAIL") ?? throw new ArgumentNullException(nameof(EmailSettings.FromEmail), "FROM_EMAIL environment variable is not set");
-    options.ToEmail = Environment.GetEnvironmentVariable("TO_EMAIL") ?? throw new ArgumentNullException(nameof(EmailSettings.ToEmail), "TO_EMAIL environment variable is not set");
+    options.FromEmail = Environment.GetEnvironmentVariable("FROM_EMAIL") ?? throw new ArgumentNullException(nameof(EmailSettings.FromEmail), 
+        "FROM_EMAIL environment variable is not set");
+    options.ToEmail = Environment.GetEnvironmentVariable("TO_EMAIL") ?? throw new ArgumentNullException(nameof(EmailSettings.ToEmail),
+        "TO_EMAIL environment variable is not set");
 });
 
 builder.Services.Configure<AwsSettings>(options => {
