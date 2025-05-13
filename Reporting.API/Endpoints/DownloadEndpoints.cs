@@ -80,7 +80,7 @@ public class DownloadEndpoints
             out date);
     }
     private static async Task<IResult> GenerateAndReturnFile(
-        List<SummaryEntry> reportData, 
+        (List<SummaryEntry> WaiterSummaries, List<LocationSummary> LocationSummaries) reportData,
         ReportDownloadRequest request, 
         IReportGenerator reportGenerator)
     {
@@ -91,21 +91,32 @@ public class DownloadEndpoints
         switch (request.Format!.ToLower())
         {
             case "excel":
-                fileBytes = await reportGenerator.GenerateReportBytesAsync(reportData);
-                fileName = $"report_{request.StartDate:yyyyMMdd}_to_{request.EndDate:yyyyMMdd}.xlsx";
+                if (request.ReportType?.ToLower() == "location")
+                {
+                    fileBytes = await reportGenerator.GenerateReportBytesAsync(reportData.WaiterSummaries);
+                    fileName = $"location_report_{request.StartDate}_to_{request.EndDate}.xlsx";
+                }
+                else
+                {
+                    fileBytes = await reportGenerator.GenerateReportBytesOfLocationSummariesAsync(reportData.LocationSummaries);
+                    fileName = $"waiter_report_{request.StartDate}_to_{request.EndDate}.xlsx";
+                }
                 contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
                 break;
                 
             case "pdf":
-                fileBytes = await reportGenerator.GenerateReportBytesPdfAsync(reportData);
-                fileName = $"report_{request.StartDate:yyyyMMdd}_to_{request.EndDate:yyyyMMdd}.pdf";
+                // Use waiter report as default for PDF
+                fileBytes = await reportGenerator.GenerateReportBytesPdfAsync(reportData.WaiterSummaries);
+                fileName = $"report_{request.StartDate}_to_{request.EndDate}.pdf";
                 contentType = "application/pdf";
                 break;
-                
+
             case "csv":
-                fileBytes = await reportGenerator.GenerateReportBytesCsvAsync(reportData);
-                fileName = $"report_{request.StartDate:yyyyMMdd}_to_{request.EndDate:yyyyMMdd}.csv";
+                // Use waiter report as default for CSV
+                fileBytes = await reportGenerator.GenerateReportBytesCsvAsync(reportData.WaiterSummaries);
+                fileName = $"report_{request.StartDate}_to_{request.EndDate}.csv";
                 contentType = "text/csv";
+                break;
                 break;
                 
             default:

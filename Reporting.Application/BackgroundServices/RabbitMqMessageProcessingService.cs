@@ -64,8 +64,12 @@ protected override async Task ExecuteAsync(CancellationToken stoppingToken)
                         Waiter = reportDto.Waiter,
                         WaiterEmail = reportDto.WaiterEmail,
                         HoursWorked = reportDto.HoursWorked,
+                        OrderId = reportDto.OrderId,
+                        OrderRevenue = reportDto.OrderRevenue,
                         AverageServiceFeedback = reportDto.AverageServiceFeedback,
                         MinimumServiceFeedback = reportDto.MinimumServiceFeedback,
+                        AverageCuisineFeedback = reportDto.AverageCuisineFeedback,
+                        MinimumCuisineFeedback = reportDto.MinimumCuisineFeedback
                     };
                     await reportRepository.SaveReportAsync(reportEntity, stoppingToken);
                     logger.LogInformation("Processed message");

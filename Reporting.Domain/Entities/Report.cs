@@ -5,11 +5,11 @@ namespace Reporting.Domain.Entities;
 public class Report
 {
     [BsonId]
-    public required string Id { get; set; }
-    
     public required string Partition { get; set; } = "weekly";
 
     public required string DateId { get; set; }
+    
+    public required string Id { get; set; }
 
     public required string Location { get; set; }
     
@@ -23,7 +23,15 @@ public class Report
         
     public required double HoursWorked { get; set; }
     
+    public required string OrderId { get; set; }
+    
+    public required decimal OrderRevenue { get; set; }
+    
     public required double AverageServiceFeedback { get; set; }
+    
+    public required double AverageCuisineFeedback { get; set; }
+    
+    public required int MinimumCuisineFeedback { get; set; }
 
     public required int MinimumServiceFeedback { get; set; }
 }
