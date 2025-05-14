@@ -13,30 +13,80 @@ namespace Reporting.Application.Formatters;
 public class PdfReportGenerator(ILogger<ReportGenerator> logger) : IPdfReportGenerator
 {
     public Task<byte[]> GenerateReportBytesAsync(IList<SummaryEntry> statistics)
-    {
-        logger.LogInformation("Generating PDF report for {Count} restaurants", statistics.Count());
+{
+    string[] headers = {
+        "Location", "Start Date", "End Date", "Waiter Name", "Waiter Email",
+        "Current Hours", "Previous Hours", "Delta Hours",
+        "Current Avg Service Feedback", "Previous Avg Service Feedback",
+        "Delta Avg Service Feedback", "Min Service Feedback"
+    };
+    
+    return GenerateReportAsync(statistics, "Restaurant Report", headers, stat => {
+        var deltaHours = ReportFormattingUtils.FormatPercentageDouble(stat.DeltaHours);
+        var deltaFeedback = ReportFormattingUtils.FormatPercentageDouble(stat.DeltaAverageServiceFeedback);
+        
+        return new Cell[] {
+            new Cell().Add(new Paragraph(stat.Location)),
+            new Cell().Add(new Paragraph(stat.StartDate)),
+            new Cell().Add(new Paragraph(stat.EndDate)),
+            new Cell().Add(new Paragraph(stat.WaiterName)),
+            new Cell().Add(new Paragraph(stat.WaiterEmail)),
+            new Cell().Add(new Paragraph(stat.CurrentHours.ToString(CultureInfo.InvariantCulture))),
+            new Cell().Add(new Paragraph(stat.PreviousHours.ToString(CultureInfo.InvariantCulture))),
+            new Cell().Add(new Paragraph(deltaHours)),
+            new Cell().Add(new Paragraph(stat.CurrentAverageServiceFeedback.ToString(CultureInfo.InvariantCulture))),
+            new Cell().Add(new Paragraph(stat.PreviousAverageServiceFeedback.ToString(CultureInfo.InvariantCulture))),
+            new Cell().Add(new Paragraph(deltaFeedback)),
+            new Cell().Add(new Paragraph(stat.MinimumServiceFeedback.ToString(CultureInfo.InvariantCulture)))
+        };
+    });
+}
 
-        using var memoryStream = new MemoryStream();
+public Task<byte[]> GenerateReportBytesLocationSummariesAsync(IList<LocationSummary> locationSummaries)
+{
+    string[] headers = {
+        "Location", "Start Date", "End Date", "Current Orders Count", "Previous Orders Count",
+        "Delta Orders %", "Current Avg Cuisine Feedback", "Previous Avg Cuisine Feedback",
+        "Delta Avg Cuisine %", "Min Cuisine Feedback",
+        "Current Revenue", "Previous Revenue", "Delta Revenue %"
+    };
+    
+    return GenerateReportAsync(locationSummaries, "Location Sales Report", headers, stat => {
+        var deltaOrders = ReportFormattingUtils.FormatPercentageDouble(stat.DeltaOrdersPercent);
+        var deltaCuisineFeedback = ReportFormattingUtils.FormatPercentageDouble(stat.DeltaAvgCuisinePercent);
+        var deltaRevenue = ReportFormattingUtils.FormatPercentageDecimal(stat.DeltaRevenuePercent);
+        
+        return new Cell[] {
+            new Cell().Add(new Paragraph(stat.LocationName)),
+            new Cell().Add(new Paragraph(stat.StartDate)),
+            new Cell().Add(new Paragraph(stat.EndDate)),
+            new Cell().Add(new Paragraph(stat.CurrentOrdersCount.ToString(CultureInfo.InvariantCulture))),
+            new Cell().Add(new Paragraph(stat.PreviousOrdersCount.ToString(CultureInfo.InvariantCulture))),
+            new Cell().Add(new Paragraph(deltaOrders)),
+            new Cell().Add(new Paragraph(stat.CurrentAvgCuisineFeedback.ToString(CultureInfo.InvariantCulture))),
+            new Cell().Add(new Paragraph(stat.PreviousAvgCuisineFeedback.ToString(CultureInfo.InvariantCulture))),
+            new Cell().Add(new Paragraph(deltaCuisineFeedback)),
+            new Cell().Add(new Paragraph(stat.CurrentMinCuisineFeedback.ToString(CultureInfo.InvariantCulture))),
+            new Cell().Add(new Paragraph(stat.CurrentRevenue.ToString(CultureInfo.InvariantCulture))),
+            new Cell().Add(new Paragraph(stat.PreviousRevenue.ToString(CultureInfo.InvariantCulture))),
+            new Cell().Add(new Paragraph(deltaRevenue))
+        };
+    });
+}
+    
+    private static Document CreatePdfDocument(MemoryStream memoryStream)
+    {
         var writer = new PdfWriter(memoryStream);
         var pdf = new PdfDocument(writer);
-        var document = new Document(pdf);
-
-        // Add title
-        document.Add(new Paragraph("Restaurant Report")
-            .SetTextAlignment(TextAlignment.CENTER)
-            .SetFontSize(14));
-
-        // Create table with the appropriate number of columns
-        var table = new Table(UnitValue.CreatePercentArray(12)).UseAllAvailableWidth();
+        var document = new Document(pdf, iText.Kernel.Geom.PageSize.A4.Rotate());
+        document.SetMargins(20, 20, 20, 20);
+        return document;
+    }
+    
+    private static Table CreateHeaderTable(string[] headers, int columnCount)
+    {
+        var table = new Table(UnitValue.CreatePercentArray(columnCount)).UseAllAvailableWidth();
         table.SetFontSize(8);
-        
-        // Add table headers
-        string[] headers = {
-            "Location", "Start Date", "End Date", "Waiter Name", "Waiter Email", 
-            "Current Hours", "Previous Hours", "Delta Hours", 
-            "Current Avg Service Feedback", "Previous Avg Service Feedback", 
-            "Delta Avg Service Feedback", "Min Service Feedback"
-        };
 
         foreach (var header in headers)
         {
@@ -44,28 +94,33 @@ public class PdfReportGenerator(ILogger<ReportGenerator> logger) : IPdfReportGen
             var headerCell = new Cell().Add(paragraph);
             table.AddHeaderCell(headerCell);
         }
+    
+        return table;
+    }
+    
+    private Task<byte[]> GenerateReportAsync<T>(
+        IList<T> data, 
+        string title,
+        string[] headers, 
+        Func<T, Cell[]> createRowCells)
+    {
+        logger.LogInformation("Generating PDF report for {Count} items", data.Count);
 
-        // Add data rows
-        foreach (var stat in statistics)
+        using var memoryStream = new MemoryStream();
+        var document = CreatePdfDocument(memoryStream);
+
+        document.Add(new Paragraph(title)
+            .SetTextAlignment(TextAlignment.CENTER)
+            .SetFontSize(14));
+
+        var table = CreateHeaderTable(headers, headers.Length);
+    
+        foreach (var item in data)
         {
-            // Format dates and numeric values
-            var startDate = stat.StartDate;
-            var endDate = stat.EndDate;
-            var deltaHours = ReportFormattingUtils.FormatPercentage(stat.DeltaHours);
-            var deltaFeedback = ReportFormattingUtils.FormatPercentage(stat.DeltaAverageServiceFeedback);
-
-            table.AddCell(stat.Location);
-            table.AddCell(startDate);
-            table.AddCell(endDate);
-            table.AddCell(stat.WaiterName);
-            table.AddCell(stat.WaiterEmail);
-            table.AddCell(stat.CurrentHours.ToString(CultureInfo.InvariantCulture));
-            table.AddCell(stat.PreviousHours.ToString(CultureInfo.InvariantCulture));
-            table.AddCell(deltaHours);
-            table.AddCell(stat.CurrentAverageServiceFeedback.ToString(CultureInfo.InvariantCulture));
-            table.AddCell(stat.PreviousAverageServiceFeedback.ToString(CultureInfo.InvariantCulture));
-            table.AddCell(deltaFeedback);
-            table.AddCell(stat.MinimumServiceFeedback.ToString(CultureInfo.InvariantCulture));
+            foreach (var cell in createRowCells(item))
+            {
+                table.AddCell(cell);
+            }
         }
 
         document.Add(table);

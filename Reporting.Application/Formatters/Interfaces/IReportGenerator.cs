@@ -13,6 +13,10 @@ public interface IReportGenerator
     Task<byte[]> GenerateReportBytesOfLocationSummariesAsync(IList<LocationSummary> locationSummaries);
     
     Task<byte[]> GenerateReportBytesPdfAsync(IList<SummaryEntry> statistics);
+
+    Task<byte[]> GenerateReportBytesOfLocationSummariesPdfAsync(IList<LocationSummary> statistics);
     
     Task<byte[]> GenerateReportBytesCsvAsync(IList<SummaryEntry> statistics);
+    
+    Task<byte[]> GenerateReportBytesOfLocationSummariesCsvAsync(IList<LocationSummary> statistics);
 }

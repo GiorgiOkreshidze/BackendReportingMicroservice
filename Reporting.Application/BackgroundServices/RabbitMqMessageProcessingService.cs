@@ -18,7 +18,6 @@ public class RabbitMqMessageProcessingService(
     IOptions<RabbitMqSettings> rabbitMqSettings,
     ILogger<RabbitMqMessageProcessingService> logger) : BackgroundService
 {
-    private const string FixedPartitionKey = "weekly";
 protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         logger.LogInformation("RabbitMQ message processing service is starting");
@@ -56,9 +55,8 @@ protected override async Task ExecuteAsync(CancellationToken stoppingToken)
                     var id = Guid.NewGuid().ToString();
                     var reportEntity = new Report
                     {
-                        Partition = FixedPartitionKey,
-                        DateId = $"{reportDto.Date}#{id}",
                         Id = id,
+                        DateId = $"{reportDto.Date}#{id}",
                         Date = reportDto.Date,
                         Location = reportDto.Location,
                         LocationId = reportDto.LocationId,

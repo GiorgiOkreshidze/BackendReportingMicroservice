@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
-using Reporting.Application.Formatters.Interfaces;
+﻿using Reporting.Application.Formatters.Interfaces;
 using Reporting.Domain.Entities;
 
 namespace Reporting.Application.Formatters;
@@ -7,8 +6,7 @@ namespace Reporting.Application.Formatters;
 public class ReportGenerator(
     IPdfReportGenerator pdfReportGenerator, 
     IExcelReportGenerator excelReportGenerator, 
-    ICsvReportGenerator csvReportGenerator, 
-    ILogger<ReportGenerator> logger
+    ICsvReportGenerator csvReportGenerator
     ) : IReportGenerator
 {
     public Task<string> GenerateWaiterReportAsync(IList<SummaryEntry> statistics)
@@ -21,12 +19,6 @@ public class ReportGenerator(
     {
         var bytes = excelReportGenerator.GenerateReportBytesOfLocationSummaries(locationSummaries);
         return Task.FromResult(Convert.ToBase64String(bytes));
-    }
-    
-    public async Task<string> GenerateReportPdfAsync(IList<SummaryEntry> statistics)
-    {
-        var bytes = await pdfReportGenerator.GenerateReportBytesAsync(statistics);
-        return Convert.ToBase64String(bytes);
     }
     
     public Task<byte[]> GenerateReportBytesAsync(IList<SummaryEntry> statistics)
@@ -45,9 +37,19 @@ public class ReportGenerator(
     {
         return pdfReportGenerator.GenerateReportBytesAsync(statistics);
     }
+    
+    public Task<byte[]> GenerateReportBytesOfLocationSummariesPdfAsync(IList<LocationSummary> statistics)
+    {
+        return pdfReportGenerator.GenerateReportBytesLocationSummariesAsync(statistics);
+    }
 
     public Task<byte[]> GenerateReportBytesCsvAsync(IList<SummaryEntry> statistics)
     {
         return csvReportGenerator.GenerateReportBytesAsync(statistics);
+    }
+    
+    public Task<byte[]> GenerateReportBytesOfLocationSummariesCsvAsync(IList<LocationSummary> statistics)
+    {
+        return csvReportGenerator.GenerateReportBytesLocationSummariesAsync(statistics);
     }
 }

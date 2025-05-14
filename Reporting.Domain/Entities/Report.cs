@@ -6,9 +6,7 @@ namespace Reporting.Domain.Entities;
 public class Report : ReportBase
 {
     [BsonId]
-    public required string Partition { get; set; } = "weekly";
+    public required string Id { get; set; }
 
     public required string DateId { get; set; }
-    
-    public required string Id { get; set; }
 }
