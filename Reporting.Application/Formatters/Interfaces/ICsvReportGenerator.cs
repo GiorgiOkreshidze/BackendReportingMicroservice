@@ -5,4 +5,7 @@ namespace Reporting.Application.Formatters.Interfaces;
 public interface ICsvReportGenerator
 {
     Task<byte[]> GenerateReportBytesAsync(IList<SummaryEntry> statistics);
+    
+    Task<byte[]> GenerateReportBytesLocationSummariesAsync(IList<LocationSummary> locationSummaries);
+
 }

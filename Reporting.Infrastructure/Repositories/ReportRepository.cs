@@ -8,7 +8,6 @@ namespace Reporting.Infrastructure.Repositories;
 
 public class ReportRepository : IReportRepository
 {
-    private const string FixedPartitionKey = "weekly";
     private readonly IMongoCollection<Report> _collection;
     private readonly ILogger<ReportRepository> _logger;
 
@@ -16,7 +15,6 @@ public class ReportRepository : IReportRepository
     {
         _collection = database.GetCollection<Report>("Reports");
         _logger = logger;
-
         CreateIndexes();
     }
 
@@ -34,7 +32,6 @@ public class ReportRepository : IReportRepository
             _logger.LogInformation("Retrieving reports from {StartDate} to {EndDate}", startDate, endDate);
 
             var filter = Builders<Report>.Filter.And(
-                Builders<Report>.Filter.Eq(r => r.Partition, FixedPartitionKey),
                 Builders<Report>.Filter.Gte(r => r.DateId, startDate.ToString("yyyy-MM-dd")),
                 Builders<Report>.Filter.Lte(r => r.DateId, endDate.ToString("yyyy-MM-dd") + "#z")
             );
@@ -61,7 +58,6 @@ public class ReportRepository : IReportRepository
             var filterBuilder = Builders<Report>.Filter;
             var filters = new List<FilterDefinition<Report>>
             {
-                filterBuilder.Eq(r => r.Partition, FixedPartitionKey),
                 filterBuilder.Gte(r => r.DateId, startDate.ToString("yyyy-MM-dd")),
                 filterBuilder.Lte(r => r.DateId, endDate.ToString("yyyy-MM-dd") + "#z")
             };

@@ -41,10 +41,10 @@ public class ReportEndpoints
             
             // Validate ReportType
             if (!string.IsNullOrEmpty(request.ReportType) && 
-                request.ReportType != "Sales" && 
-                request.ReportType != "Performance")
+                request.ReportType.ToLower() != "sales" && 
+                request.ReportType.ToLower() != "performance")
             {
-                return Results.BadRequest(new { Message = "ReportType must be either 'Sales' or 'Performance'" });
+                return Results.BadRequest(new { Message = "ReportType must be either 'sales' or 'performance'" });
             }
             
             logger.LogInformation("Retrieving reports from {StartDate} to {EndDate}{LocationFilter}",
@@ -65,7 +65,7 @@ public class ReportEndpoints
                 });
             }
             
-            return request.ReportType == "Sales" 
+            return request.ReportType.ToLower() == "sales" 
                 ? Results.Ok(result.LocationSummaries) 
                 : Results.Ok(result.WaiterSummaries);
         }

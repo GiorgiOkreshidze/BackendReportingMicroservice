@@ -20,6 +20,7 @@ public class DownloadEndpoints
         ILogger<DownloadEndpoints> logger,
         [AsParameters] ReportDownloadRequest request)
     {
+      
         try
         {
             // Validate required parameters
@@ -84,6 +85,15 @@ public class DownloadEndpoints
         ReportDownloadRequest request, 
         IReportGenerator reportGenerator)
     {
+        if (string.IsNullOrEmpty(request.ReportType) || 
+            !new[] { "sales", "performance" }.Contains(request.ReportType.ToLower()))
+        {
+            return Results.BadRequest(new { Message = "ReportType must be either 'sales' or 'performance'" });
+        }
+
+        bool isSalesReport = request.ReportType.ToLower() == "sales";
+        string dateRange = $"{request.StartDate}_to_{request.EndDate}";
+        
         byte[] fileBytes;
         string fileName;
         string contentType;
@@ -91,36 +101,42 @@ public class DownloadEndpoints
         switch (request.Format!.ToLower())
         {
             case "excel":
-                if (request.ReportType?.ToLower() == "location")
-                {
-                    fileBytes = await reportGenerator.GenerateReportBytesAsync(reportData.WaiterSummaries);
-                    fileName = $"location_report_{request.StartDate}_to_{request.EndDate}.xlsx";
-                }
-                else
-                {
-                    fileBytes = await reportGenerator.GenerateReportBytesOfLocationSummariesAsync(reportData.LocationSummaries);
-                    fileName = $"waiter_report_{request.StartDate}_to_{request.EndDate}.xlsx";
-                }
+                fileBytes = isSalesReport
+                    ? await reportGenerator.GenerateReportBytesOfLocationSummariesAsync(reportData.LocationSummaries)
+                    : await reportGenerator.GenerateReportBytesAsync(reportData.WaiterSummaries);
+                
+                fileName = isSalesReport
+                    ? $"location_report_{dateRange}.xlsx"
+                    : $"waiter_report_{dateRange}.xlsx";
+                
                 contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
                 break;
                 
             case "pdf":
-                // Use waiter report as default for PDF
-                fileBytes = await reportGenerator.GenerateReportBytesPdfAsync(reportData.WaiterSummaries);
-                fileName = $"report_{request.StartDate}_to_{request.EndDate}.pdf";
+                fileBytes = isSalesReport
+                    ? await reportGenerator.GenerateReportBytesOfLocationSummariesPdfAsync(reportData.LocationSummaries)
+                    : await reportGenerator.GenerateReportBytesPdfAsync(reportData.WaiterSummaries);
+                
+                fileName = isSalesReport
+                    ? $"location_report_{dateRange}.pdf"
+                    : $"waiter_report_{dateRange}.pdf";
+                
                 contentType = "application/pdf";
                 break;
 
             case "csv":
-                // Use waiter report as default for CSV
-                fileBytes = await reportGenerator.GenerateReportBytesCsvAsync(reportData.WaiterSummaries);
-                fileName = $"report_{request.StartDate}_to_{request.EndDate}.csv";
+                fileBytes = isSalesReport
+                    ? await reportGenerator.GenerateReportBytesOfLocationSummariesCsvAsync(reportData.LocationSummaries)
+                    : await reportGenerator.GenerateReportBytesCsvAsync(reportData.WaiterSummaries);
+                
+                fileName = isSalesReport
+                    ? $"location_report_{dateRange}.csv" // Fixed extension (was pdf)
+                    : $"waiter_report_{dateRange}.csv";
                 contentType = "text/csv";
-                break;
                 break;
                 
             default:
-                return Results.BadRequest("Unsupported format");
+                return Results.BadRequest(new { Message = "Unsupported Format" });
         }
 
         return Results.File(fileBytes, contentType, fileName);
